@@ -748,6 +748,29 @@ export const CardItemPhysicalDetails = ({
                 .with(
                   {
                     physicalCard: {
+                      statusInfo: { __typename: "PhysicalCardConsentPendingStatusInfo" },
+                    },
+                    isCurrentUserCardOwner: true,
+                  },
+                  ({ physicalCard }) => (
+                    <>
+                      <Space height={24} />
+
+                      <LakeButton
+                        color="current"
+                        onPress={() =>
+                          window.location.replace(physicalCard.statusInfo.consent.consentUrl)
+                        }
+                        loading={physicalCardActivation.isLoading()}
+                      >
+                        {t("card.physical.finalizeOrder")}
+                      </LakeButton>
+                    </>
+                  ),
+                )
+                .with(
+                  {
+                    physicalCard: {
                       statusInfo: { __typename: "PhysicalCardToActivateStatusInfo" },
                     },
                     isCurrentUserCardOwner: true,

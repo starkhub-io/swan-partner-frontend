@@ -200,6 +200,13 @@ export const MaskedCard = ({
         </View>
 
         {match(status)
+          .with("ConsentPending", () => (
+            <View style={styles.statusLayer}>
+              <Tag color="warning" icon="settings-regular">
+                {t("card.pending")}
+              </Tag>
+            </View>
+          ))
           .with("Processing", () => (
             <View style={styles.statusLayer}>
               <Tag color="warning" icon="settings-regular">
