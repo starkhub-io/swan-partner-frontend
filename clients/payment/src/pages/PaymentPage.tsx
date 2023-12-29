@@ -1,5 +1,6 @@
 import { Dict } from "@swan-io/boxed";
 import { Box } from "@swan-io/lake/src/components/Box";
+import { Icon } from "@swan-io/lake/src/components/Icon";
 import { LakeButton } from "@swan-io/lake/src/components/LakeButton";
 import { LakeHeading } from "@swan-io/lake/src/components/LakeHeading";
 import { LakeLabel } from "@swan-io/lake/src/components/LakeLabel";
@@ -21,6 +22,7 @@ import { combineValidators, hasDefinedKeys, useForm } from "react-ux-form";
 import { P, match } from "ts-pattern";
 import { formatCurrency } from "../../../banking/src/utils/i18n";
 import { validateIban } from "../../../banking/src/utils/iban";
+import { Card } from "../components/Card";
 import { SepaLogo } from "../components/SepaLogo";
 import {
   AddSepaDirectDebitPaymentMandateFromPaymentLinkDocument,
@@ -44,7 +46,7 @@ const styles = StyleSheet.create({
 });
 
 type FormState = {
-  paymentMethod: "SepaDirectDebitCore";
+  paymentMethod: "SepaDirectDebitCore" | "Card";
   iban: string;
   country: CountryCCA3;
   name: string;
@@ -74,7 +76,7 @@ const fieldToPathMap = {
 export const PaymentPage = ({ paymentLink, setMandateUrl, nonEeaCountries }: Props) => {
   const { desktop } = useResponsive();
 
-  const { Field, submitForm, setFieldError, focusField } = useForm<FormState>({
+  const { Field, submitForm, setFieldError, focusField, FieldsListener } = useForm<FormState>({
     paymentMethod: {
       initialValue: "SepaDirectDebitCore",
     },
@@ -250,6 +252,11 @@ export const PaymentPage = ({ paymentLink, setMandateUrl, nonEeaCountries }: Pro
                     name: "Direct Debit",
                     icon: <SepaLogo height={15} />,
                   },
+                  {
+                    id: "Card",
+                    name: "Card",
+                    icon: <Icon name="lake-card" size={24} />,
+                  },
                 ]}
                 onValueChange={onChange}
               />
@@ -260,137 +267,148 @@ export const PaymentPage = ({ paymentLink, setMandateUrl, nonEeaCountries }: Pro
 
       <Space height={24} />
 
-      <Field name="iban">
-        {({ value, valid, error, onChange, onBlur, ref }) => (
-          <LakeLabel
-            label={t("paymentLink.iban")}
-            render={() => (
-              <LakeTextInput
-                value={value}
-                valid={valid}
-                error={error}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                ref={ref}
-              />
-            )}
-          />
-        )}
-      </Field>
+      <FieldsListener names={["paymentMethod"]}>
+        {({ paymentMethod }) =>
+          match(paymentMethod.value)
+            .with("Card", () => <Card />)
+            .with("SepaDirectDebitCore", () => (
+              <>
+                <Field name="iban">
+                  {({ value, valid, error, onChange, onBlur, ref }) => (
+                    <LakeLabel
+                      label={t("paymentLink.iban")}
+                      render={() => (
+                        <LakeTextInput
+                          value={value}
+                          valid={valid}
+                          error={error}
+                          onBlur={onBlur}
+                          onChangeText={onChange}
+                          ref={ref}
+                        />
+                      )}
+                    />
+                  )}
+                </Field>
 
-      <Field name="country">
-        {({ value, error, onChange, ref }) => (
-          <LakeLabel
-            label={t("paymentLink.country")}
-            render={id => (
-              <CountryPicker
-                id={id}
-                countries={allCountries}
-                value={value}
-                onValueChange={onChange}
-                error={error}
-                ref={ref}
-              />
-            )}
-          />
-        )}
-      </Field>
+                <Field name="country">
+                  {({ value, error, onChange, ref }) => (
+                    <LakeLabel
+                      label={t("paymentLink.country")}
+                      render={id => (
+                        <CountryPicker
+                          id={id}
+                          countries={allCountries}
+                          value={value}
+                          onValueChange={onChange}
+                          error={error}
+                          ref={ref}
+                        />
+                      )}
+                    />
+                  )}
+                </Field>
 
-      <Field name="name">
-        {({ value, valid, error, onChange, onBlur, ref }) => (
-          <LakeLabel
-            label={t("paymentLink.name")}
-            render={() => (
-              <LakeTextInput
-                value={value}
-                valid={valid}
-                error={error}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                ref={ref}
-              />
-            )}
-          />
-        )}
-      </Field>
+                <Field name="name">
+                  {({ value, valid, error, onChange, onBlur, ref }) => (
+                    <LakeLabel
+                      label={t("paymentLink.name")}
+                      render={() => (
+                        <LakeTextInput
+                          value={value}
+                          valid={valid}
+                          error={error}
+                          onChangeText={onChange}
+                          onBlur={onBlur}
+                          ref={ref}
+                        />
+                      )}
+                    />
+                  )}
+                </Field>
 
-      <Field name="addressLine1">
-        {({ value, valid, error, onChange, onBlur, ref }) => (
-          <LakeLabel
-            label={t("paymentLink.addressLine1")}
-            render={() => (
-              <LakeTextInput
-                value={value}
-                valid={valid}
-                error={error}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                ref={ref}
-              />
-            )}
-          />
-        )}
-      </Field>
+                <Field name="addressLine1">
+                  {({ value, valid, error, onChange, onBlur, ref }) => (
+                    <LakeLabel
+                      label={t("paymentLink.addressLine1")}
+                      render={() => (
+                        <LakeTextInput
+                          value={value}
+                          valid={valid}
+                          error={error}
+                          onChangeText={onChange}
+                          onBlur={onBlur}
+                          ref={ref}
+                        />
+                      )}
+                    />
+                  )}
+                </Field>
 
-      <Field name="city">
-        {({ value, valid, error, onChange, onBlur, ref }) => (
-          <LakeLabel
-            label={t("paymentLink.city")}
-            render={() => (
-              <LakeTextInput
-                value={value}
-                valid={valid}
-                error={error}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                ref={ref}
-              />
-            )}
-          />
-        )}
-      </Field>
+                <Field name="city">
+                  {({ value, valid, error, onChange, onBlur, ref }) => (
+                    <LakeLabel
+                      label={t("paymentLink.city")}
+                      render={() => (
+                        <LakeTextInput
+                          value={value}
+                          valid={valid}
+                          error={error}
+                          onChangeText={onChange}
+                          onBlur={onBlur}
+                          ref={ref}
+                        />
+                      )}
+                    />
+                  )}
+                </Field>
 
-      <Box direction={desktop ? "row" : "column"}>
-        <Field name="postalCode">
-          {({ value, valid, error, onChange, onBlur, ref }) => (
-            <LakeLabel
-              label={t("paymentLink.postalCode")}
-              style={desktop && styles.half}
-              render={() => (
-                <LakeTextInput
-                  value={value}
-                  valid={valid}
-                  error={error}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  ref={ref}
-                />
-              )}
-            />
-          )}
-        </Field>
+                <Box direction={desktop ? "row" : "column"}>
+                  <Field name="postalCode">
+                    {({ value, valid, error, onChange, onBlur, ref }) => (
+                      <LakeLabel
+                        label={t("paymentLink.postalCode")}
+                        style={desktop && styles.half}
+                        render={() => (
+                          <LakeTextInput
+                            value={value}
+                            valid={valid}
+                            error={error}
+                            onChangeText={onChange}
+                            onBlur={onBlur}
+                            ref={ref}
+                          />
+                        )}
+                      />
+                    )}
+                  </Field>
 
-        <Space width={24} />
+                  <Space width={24} />
 
-        <Field name="state">
-          {({ value, valid, error, onChange, onBlur, ref }) => (
-            <LakeLabel
-              label={t("paymentLink.state")}
-              style={desktop && styles.half}
-              render={() => (
-                <LakeTextInput
-                  value={value}
-                  valid={valid}
-                  error={error}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  ref={ref}
-                />
-              )}
-            />
-          )}
-        </Field>
-      </Box>
+                  <Field name="state">
+                    {({ value, valid, error, onChange, onBlur, ref }) => (
+                      <LakeLabel
+                        label={t("paymentLink.state")}
+                        style={desktop && styles.half}
+                        render={() => (
+                          <LakeTextInput
+                            value={value}
+                            valid={valid}
+                            error={error}
+                            onChangeText={onChange}
+                            onBlur={onBlur}
+                            ref={ref}
+                          />
+                        )}
+                      />
+                    )}
+                  </Field>
+                </Box>
+              </>
+            ))
+            .exhaustive()
+        }
+      </FieldsListener>
 
       <Space height={32} />
 
