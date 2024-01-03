@@ -289,6 +289,7 @@ export const start = async ({
   });
 
   app.addHook("onRequest", (request, reply, done) => {
+    void reply.header("content-security-policy", "frame-ancestors: 'none'");
     if (request.url.startsWith("/api/") || !request.url.startsWith("/auth/")) {
       void reply.header("cache-control", `public, max-age=0`);
     }
